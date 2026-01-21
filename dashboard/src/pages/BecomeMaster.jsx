@@ -63,91 +63,109 @@ function BecomeMaster({ user, onLogout }) {
 
     return (
         <Layout user={user} onLogout={onLogout}>
-            <div className="dashboard fade-in">
-                <div className="page-header">
-                    <h1>Become a Master Trader</h1>
-                    <p>Share your trading signals and earn subscription fees</p>
-                </div>
+            {/* LAYOUT FIX: 
+               We use a flex container with minHeight to force vertical centering.
+            */}
+            <div className="dashboard fade-in" style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '85vh', // Takes up most of the screen height
+                width: '100%'
+            }}>
 
-                <div className="auth-container" style={{ maxWidth: '600px', margin: '0 0' }}>
-                    <form className="auth-card glass" onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Display Name</label>
-                            <div className="input-group">
-                                <Activity size={20} className="input-icon" />
-                                <input
-                                    type="text"
-                                    placeholder="Your Public Trader Name"
-                                    value={formData.display_name}
-                                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                                    required
+                {/* CONTENT WRAPPER: 
+                   Keeps the width contained and responsive (max 600px).
+                */}
+                <div style={{ width: '100%', maxWidth: '600px' }}>
+
+                    <div className="page-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <h1>Become a Master Trader</h1>
+                        <p>Share your trading signals and earn subscription fees</p>
+                    </div>
+
+                    <div className="auth-container" style={{ margin: '0', width: '100%' }}>
+                        <form className="auth-card glass" onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Display Name</label>
+                                <div className="input-group">
+                                    <Activity size={20} className="input-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="Your Public Trader Name"
+                                        value={formData.display_name}
+                                        onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Strategy Name</label>
+                                <div className="input-group">
+                                    <Shield size={20} className="input-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Gold Scalper Pro"
+                                        value={formData.strategy_name}
+                                        onChange={(e) => setFormData({ ...formData, strategy_name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Monthly Fee (USD)</label>
+                                <div className="input-group">
+                                    <DollarSign size={20} className="input-icon" />
+                                    <input
+                                        type="number"
+                                        placeholder="99"
+                                        value={formData.monthly_fee}
+                                        onChange={(e) => setFormData({ ...formData, monthly_fee: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Short Bio</label>
+                                <textarea
+                                    className="glass"
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        color: 'white',
+                                        minHeight: '100px',
+                                        marginTop: '8px',
+                                        resize: 'none' // Prevents user from breaking layout by dragging
+                                    }}
+                                    placeholder="Describe your trading style and risk management..."
+                                    value={formData.bio}
+                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                                 />
                             </div>
-                        </div>
 
-                        <div className="form-group">
-                            <label>Strategy Name</label>
-                            <div className="input-group">
-                                <Shield size={20} className="input-icon" />
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Gold Scalper Pro"
-                                    value={formData.strategy_name}
-                                    onChange={(e) => setFormData({ ...formData, strategy_name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Monthly Fee (USD)</label>
-                            <div className="input-group">
-                                <DollarSign size={20} className="input-icon" />
-                                <input
-                                    type="number"
-                                    placeholder="99"
-                                    value={formData.monthly_fee}
-                                    onChange={(e) => setFormData({ ...formData, monthly_fee: e.target.value })}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Short Bio</label>
-                            <textarea
-                                className="glass"
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    background: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    color: 'white',
-                                    minHeight: '100px',
-                                    marginTop: '8px'
-                                }}
-                                placeholder="Describe your trading style and risk management..."
-                                value={formData.bio}
-                                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                            />
-                        </div>
-
-                        {message.text && (
-                            <p className={message.type === 'error' ? 'error-text' : 'success-text'} style={{ marginBottom: '16px' }}>
-                                {message.text}
-                            </p>
-                        )}
-
-                        <button className="auth-btn" type="submit" disabled={loading}>
-                            {loading ? 'Processing...' : (
-                                <>
-                                    <Send size={20} />
-                                    Launch Master Profile
-                                </>
+                            {message.text && (
+                                <p className={message.type === 'error' ? 'error-text' : 'success-text'} style={{ marginBottom: '16px' }}>
+                                    {message.text}
+                                </p>
                             )}
-                        </button>
-                    </form>
+
+                            <button className="auth-btn" type="submit" disabled={loading}>
+                                {loading ? 'Processing...' : (
+                                    <>
+                                        <Send size={20} />
+                                        Launch Master Profile
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </Layout>

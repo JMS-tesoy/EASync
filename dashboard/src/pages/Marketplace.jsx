@@ -46,9 +46,15 @@ function Marketplace({ user, onLogout }) {
         try {
             const response = await fetch(`${API_URL}/masters/`)
             const data = await response.json()
-            setMasters(data)
+            if (Array.isArray(data)) {
+                setMasters(data)
+            } else {
+                console.error('Unexpected masters response:', data)
+                setMasters([])
+            }
         } catch (err) {
             console.error('Failed to fetch masters:', err)
+            setMasters([])
         } finally {
             setLoading(false)
         }
@@ -70,6 +76,13 @@ function Marketplace({ user, onLogout }) {
                     master_id: master.user_id || master.master_id
                 })
             })
+
+            if (response.status === 401) {
+                localStorage.removeItem('token')
+                localStorage.removeItem('user')
+                window.location.href = '/login'
+                return
+            }
 
             const data = await response.json()
 

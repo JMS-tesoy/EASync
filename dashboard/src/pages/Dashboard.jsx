@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
-import { TrendingUp, Users, DollarSign, Shield, Activity } from 'lucide-react'
+import { TrendingUp, Users, DollarSign, Shield, Activity, Download } from 'lucide-react'
 import './Dashboard.css'
 
 const API_URL = 'http://localhost:8000/api/v1'
@@ -23,22 +23,36 @@ function Dashboard({ user, onLogout }) {
             const token = localStorage.getItem('token')
             const headers = { 'Authorization': `Bearer ${token}` }
 
+            // Common response handler
+            const handleRes = async (res) => {
+                if (res.status === 401) {
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('user')
+                    window.location.href = '/login'
+                    return null
+                }
+                return res.json()
+            }
+
             // Fetch wallet
             const walletRes = await fetch(`${API_URL}/wallet`, { headers })
-            const wallet = await walletRes.json()
+            const wallet = await handleRes(walletRes)
+            if (!wallet) return
 
             // Fetch subscriptions
             const subsRes = await fetch(`${API_URL}/subscriptions`, { headers })
-            const subs = await subsRes.json()
+            const subs = await handleRes(subsRes)
+            if (!subs) return
 
             // Fetch protection events
             const eventsRes = await fetch(`${API_URL}/protection-events?hours=24`, { headers })
-            const events = await eventsRes.json()
+            const events = await handleRes(eventsRes)
+            if (!events) return
 
             setStats({
-                subscriptions: subs.length,
-                balance: wallet.balance_usd,
-                protectionEvents: events.length,
+                subscriptions: Array.isArray(subs) ? subs.length : 0,
+                balance: wallet.balance_usd || 0,
+                protectionEvents: Array.isArray(events) ? events.length : 0,
                 trustScore: user?.trust_score || 100
             })
         } catch (err) {
@@ -116,6 +130,10 @@ function Dashboard({ user, onLogout }) {
                                     <button className="action-btn" onClick={() => window.location.href = '/wallet'}>
                                         <DollarSign size={20} />
                                         Add Funds
+                                    </button>
+                                    <button className="action-btn" onClick={() => window.location.href = '/subscriptions'}>
+                                        <Download size={20} />
+                                        Download EA
                                     </button>
                                 </div>
                             </div>

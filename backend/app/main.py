@@ -8,7 +8,9 @@ Main application entry point.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import logging
+import os
 
 from app.config import settings
 from app.database import init_db, close_db
@@ -95,6 +97,15 @@ app.include_router(subscriptions.router, prefix="/api/v1", tags=["Subscriptions"
 app.include_router(wallets.router, prefix="/api/v1", tags=["Wallets"])
 app.include_router(protection.router, prefix="/api/v1", tags=["Protection"])
 app.include_router(masters.router, prefix="/api/v1/masters", tags=["Masters"])
+
+
+# Mount static files for EA downloads
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    logger.info(f"✅ Static files mounted from {static_dir}")
+else:
+    logger.warning(f"⚠️ Static directory {static_dir} not found. EA downloads will be unavailable.")
 
 
 # Global exception handler
