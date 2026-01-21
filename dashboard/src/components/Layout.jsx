@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X, Activity, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import './Layout.css'
 
@@ -9,9 +9,11 @@ function Layout({ children, user, onLogout }) {
 
     const navItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+        { path: '/marketplace', icon: TrendingUp, label: 'Marketplace' },
         { path: '/subscriptions', icon: Users, label: 'Subscriptions' },
+        { path: '/become-master', icon: Shield, label: 'Become a Master' },
         { path: '/wallet', icon: CreditCard, label: 'Wallet' },
-        { path: '/protection', icon: Shield, label: 'Protection' },
+        { path: '/protection', icon: Activity, label: 'Protection' },
     ]
 
     return (

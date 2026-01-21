@@ -151,3 +151,30 @@ class ProtectionEventResponse(BaseModel):
     
     class Config:
         from_attributes = True
+# ============================================================================
+# Master Trader Schemas
+# ============================================================================
+
+class MasterProfileCreate(BaseModel):
+    """Create or update master trader profile"""
+    display_name: str = Field(..., min_length=3, max_length=100)
+    strategy_name: str = Field(..., min_length=3, max_length=100)
+    monthly_fee: Decimal = Field(Decimal("0.00"), ge=0)
+    bio: Optional[str] = Field(None, max_length=1000)
+
+
+class MasterProfileResponse(BaseModel):
+    """Master trader profile information"""
+    user_id: str
+    display_name: str
+    strategy_name: str
+    monthly_fee: Decimal
+    bio: Optional[str]
+    win_rate: Decimal
+    total_signals: int
+    avg_profit: Decimal
+    verified: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True

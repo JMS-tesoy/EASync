@@ -12,7 +12,7 @@ import logging
 
 from app.config import settings
 from app.database import init_db, close_db
-from app.api import auth, subscriptions, wallets, protection
+from app.api import auth, subscriptions, wallets, protection, masters
 
 # Configure logging
 logging.basicConfig(
@@ -94,6 +94,7 @@ app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(subscriptions.router, prefix="/api/v1", tags=["Subscriptions"])
 app.include_router(wallets.router, prefix="/api/v1", tags=["Wallets"])
 app.include_router(protection.router, prefix="/api/v1", tags=["Protection"])
+app.include_router(masters.router, prefix="/api/v1/masters", tags=["Masters"])
 
 
 # Global exception handler

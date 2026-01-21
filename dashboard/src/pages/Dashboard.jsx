@@ -105,6 +105,10 @@ function Dashboard({ user, onLogout }) {
                             <div className="dashboard-card glass">
                                 <h3>Quick Actions</h3>
                                 <div className="quick-actions">
+                                    <button className="action-btn" onClick={() => window.location.href = '/marketplace'}>
+                                        <TrendingUp size={20} />
+                                        Marketplace
+                                    </button>
                                     <button className="action-btn" onClick={() => window.location.href = '/subscriptions'}>
                                         <Users size={20} />
                                         Manage Subscriptions
@@ -112,10 +116,6 @@ function Dashboard({ user, onLogout }) {
                                     <button className="action-btn" onClick={() => window.location.href = '/wallet'}>
                                         <DollarSign size={20} />
                                         Add Funds
-                                    </button>
-                                    <button className="action-btn" onClick={() => window.location.href = '/protection'}>
-                                        <Shield size={20} />
-                                        View Protection Events
                                     </button>
                                 </div>
                             </div>
