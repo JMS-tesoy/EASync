@@ -58,7 +58,7 @@ function Dashboard({ user, onLogout }) {
         {
             icon: DollarSign,
             label: 'Wallet Balance',
-            value: `$${stats.balance.toFixed(2)}`,
+            value: `$${(Number(stats.balance) || 0).toFixed(2)}`,
             color: '#10b981'
         },
         {
@@ -130,8 +130,8 @@ function Dashboard({ user, onLogout }) {
                                     <div className="status-item">
                                         <span>Trust Score</span>
                                         <span className={`badge ${stats.trustScore >= 70 ? 'badge-success' :
-                                                stats.trustScore >= 40 ? 'badge-warning' :
-                                                    'badge-danger'
+                                            stats.trustScore >= 40 ? 'badge-warning' :
+                                                'badge-danger'
                                             }`}>{stats.trustScore}/100</span>
                                     </div>
                                     <div className="status-item">

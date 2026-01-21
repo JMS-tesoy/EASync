@@ -11,6 +11,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import hashlib
+import base64
 
 from app.config import settings
 
@@ -21,14 +23,28 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 
+def _prepare_password(password: str) -> str:
+    """Prepare password for bcrypt (handles 72 byte limit)"""
+    # bcrypt has a 72 byte limit, so we pre-hash longer passwords with SHA256
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        # Pre-hash with SHA256 and encode as base64 (43 chars)
+        hash_bytes = hashlib.sha256(password_bytes).digest()
+        return base64.b64encode(hash_bytes).decode('utf-8')
+    return password
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    prepared = _prepare_password(plain_password)
+    return pwd_context.verify(prepared, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
-    return pwd_context.hash(password)
+    prepared = _prepare_password(password)
+    return pwd_context.hash(prepared)
+
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

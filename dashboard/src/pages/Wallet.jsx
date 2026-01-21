@@ -52,7 +52,7 @@ function Wallet({ user, onLogout }) {
                                 </div>
                                 <div className="stat-content">
                                     <p className="stat-label">Available Balance</p>
-                                    <h2 className="stat-value">${wallet?.balance_usd.toFixed(2)}</h2>
+                                    <h2 className="stat-value">${(Number(wallet?.balance_usd) || 0).toFixed(2)}</h2>
                                 </div>
                             </div>
                             <div className="stat-card glass">
@@ -61,7 +61,7 @@ function Wallet({ user, onLogout }) {
                                 </div>
                                 <div className="stat-content">
                                     <p className="stat-label">Reserved</p>
-                                    <h2 className="stat-value">${wallet?.reserved_usd.toFixed(2)}</h2>
+                                    <h2 className="stat-value">${(Number(wallet?.reserved_usd) || 0).toFixed(2)}</h2>
                                 </div>
                             </div>
                         </div>
@@ -89,7 +89,7 @@ function Wallet({ user, onLogout }) {
                                                 color: tx.entry_type.includes('DEPOSIT') || tx.entry_type.includes('CREDIT') ? '#10b981' : '#ef4444'
                                             }}>
                                                 {tx.entry_type.includes('DEPOSIT') || tx.entry_type.includes('CREDIT') ? '+' : '-'}
-                                                ${tx.amount_usd.toFixed(2)}
+                                                ${(Number(tx.amount_usd) || 0).toFixed(2)}
                                             </div>
                                         </div>
                                     ))}

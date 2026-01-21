@@ -1,35 +1,82 @@
-"""
-Authentication API Endpoints
-=============================
-
-User registration, login, and profile management.
-"""
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, text
+from datetime import datetime, timedelta
+from typing import Optional, Union, Any
 import uuid
-from datetime import timedelta
+from jose import JWTError, jwt
+import bcrypt  # Replaces passlib
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
+from app.config import settings
 from app.database import get_db
 from app.schemas import UserRegister, UserLogin, Token, UserResponse
-from app.auth import (
-    get_password_hash,
-    verify_password,
-    create_access_token,
-    get_current_user_id
-)
-from app.config import settings
 
+# Security scheme
+security = HTTPBearer()
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verifies a plain password against the stored bcrypt hash.
+    """
+    # bcrypt requires bytes
+    password_byte_enc = plain_password.encode('utf-8')
+    hashed_password_byte_enc = hashed_password.encode('utf-8')
+    
+    return bcrypt.checkpw(password_byte_enc, hashed_password_byte_enc)
+
+def get_password_hash(password: str) -> str:
+    """
+    Hashes a password using bcrypt.
+    """
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(pwd_bytes, salt)
+    
+    # Return as string for database storage
+    return hashed_password.decode('utf-8')
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Creates a JWT access token.
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
+        
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    return encoded_jwt
+
+async def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    """
+    Validates JWT token and returns the user_id (sub).
+    """
+    token = credentials.credentials
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+        return user_id
+    except JWTError:
+        raise credentials_exception
+
+# Router definition
 router = APIRouter()
-
 
 @router.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
     """
     Register a new user.
-    
-    Creates user account and initializes wallet with $0 balance.
     """
     # Check if email already exists
     result = await db.execute(
@@ -93,7 +140,6 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         created_at=user.created_at
     )
 
-
 @router.post("/auth/login", response_model=Token)
 async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     """
@@ -134,7 +180,6 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     
     return Token(access_token=access_token)
 
-
 @router.get("/auth/me", response_model=UserResponse)
 async def get_current_user(
     user_id: str = Depends(get_current_user_id),
@@ -167,3 +212,4 @@ async def get_current_user(
         is_active=user.is_active,
         created_at=user.created_at
     )
+
