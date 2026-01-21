@@ -1,0 +1,12 @@
+[server]
+bind_address = "0.0.0.0:9000"
+max_packet_size = 4096
+rate_limit_per_sec = 100
+
+[redis]
+url = "redis://127.0.0.1:6379"
+stream_key = "signals:ingest"
+
+[database]
+# PostgreSQL connection for license validation
+url = "postgresql://execution_user:your_password@localhost:5432/execution_control"

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package execution_control;
+
+// Signal packet sent from Master EA to Ingest Server
+message SignalPacket {
+    // Authentication
+    string license_token = 1;
+    string subscription_id = 2;
+    
+    // Sequence control (monotonic counter)
+    int64 sequence_number = 3;
+    
+    // Timing (UTC timestamps in milliseconds since epoch)
+    int64 generated_at = 4;         // When master EA created signal
+    int64 server_arrival_time = 5;  // Stamped by ingest server (optional on send)
+    
+    // Trade parameters
+    string symbol = 6;              // e.g., "EURUSD"
+    OrderType order_type = 7;
+    double volume = 8;              // Lot size
+    double price = 9;               // Price at master's execution
+    double stop_loss = 10;
+    double take_profit = 11;
+    
+    // Security
+    string signature = 12;          // HMAC-SHA256(payload, secret_key)
+}
+
+enum OrderType {
+    ORDER_TYPE_UNSPECIFIED = 0;
+    ORDER_TYPE_BUY = 1;
+    ORDER_TYPE_SELL = 2;
+    ORDER_TYPE_CLOSE = 3;
+}
+
+// Response from Ingest Server
+message IngestResponse {
+    bool success = 1;
+    string message = 2;
+    int64 server_timestamp = 3;
+    string request_id = 4;
+}

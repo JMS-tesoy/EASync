@@ -1,0 +1,66 @@
+import { Link, useLocation } from 'react-router-dom'
+import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X } from 'lucide-react'
+import { useState } from 'react'
+import './Layout.css'
+
+function Layout({ children, user, onLogout }) {
+    const location = useLocation()
+    const [sidebarOpen, setSidebarOpen] = useState(true)
+
+    const navItems = [
+        { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+        { path: '/subscriptions', icon: Users, label: 'Subscriptions' },
+        { path: '/wallet', icon: CreditCard, label: 'Wallet' },
+        { path: '/protection', icon: Shield, label: 'Protection' },
+    ]
+
+    return (
+        <div className="layout">
+            <aside className={`sidebar glass ${sidebarOpen ? 'open' : 'closed'}`}>
+                <div className="sidebar-header">
+                    <h2 className="gradient-text">Execution Control</h2>
+                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                </div>
+
+                <nav className="sidebar-nav">
+                    {navItems.map(item => (
+                        <Link
+                            key={item.path}
+                            to={item.path}
+                            className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                        >
+                            <item.icon size={20} />
+                            {sidebarOpen && <span>{item.label}</span>}
+                        </Link>
+                    ))}
+                </nav>
+
+                <div className="sidebar-footer">
+                    <div className="user-info">
+                        {sidebarOpen && (
+                            <>
+                                <div className="user-avatar">{user?.email?.[0]?.toUpperCase()}</div>
+                                <div className="user-details">
+                                    <p className="user-name">{user?.full_name || 'User'}</p>
+                                    <p className="user-email">{user?.email}</p>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    <button className="btn-logout" onClick={onLogout}>
+                        <LogOut size={20} />
+                        {sidebarOpen && <span>Logout</span>}
+                    </button>
+                </div>
+            </aside>
+
+            <main className="main-content">
+                {children}
+            </main>
+        </div>
+    )
+}
+
+export default Layout
