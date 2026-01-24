@@ -148,3 +148,83 @@ async def get_master(user_id: str, db: AsyncSession = Depends(get_db)):
         verified=profile.verified,
         created_at=profile.created_at
     )
+
+@router.get("/profile/me", response_model=MasterProfileResponse)
+async def get_my_master_profile(
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get the current user's master profile.
+    """
+    result = await db.execute(
+        text("SELECT * FROM master_profiles WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    )
+    profile = result.first()
+    
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Master profile not found"
+        )
+    
+    return MasterProfileResponse(
+        user_id=str(profile.user_id),
+        display_name=profile.display_name,
+        strategy_name=profile.strategy_name,
+        monthly_fee=profile.monthly_fee,
+        bio=profile.bio,
+        win_rate=profile.win_rate,
+        total_signals=profile.total_signals,
+        avg_profit=profile.avg_profit,
+        verified=profile.verified,
+        created_at=profile.created_at
+    )
+
+@router.get("/my/subscribers")
+async def get_my_subscribers(
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    List all subscribers for the current master trader.
+    """
+    # Verify the user is actually a master
+    master_check = await db.execute(
+        text("SELECT verified FROM master_profiles WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    )
+    if not master_check.first():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only master traders can view their subscribers"
+        )
+
+    # Fetch subscribers with their email from users table
+    result = await db.execute(
+        text("""
+            SELECT 
+                s.subscription_id,
+                u.email as subscriber_email,
+                s.state,
+                s.is_active,
+                s.created_at
+            FROM subscriptions s
+            JOIN users u ON s.subscriber_id = u.user_id
+            WHERE s.master_id = :user_id
+            ORDER BY s.created_at DESC
+        """),
+        {"user_id": user_id}
+    )
+    subscribers = result.all()
+    
+    return [
+        {
+            "subscription_id": str(s.subscription_id),
+            "email": s.subscriber_email,
+            "state": s.state,
+            "is_active": s.is_active,
+            "created_at": s.created_at
+        } for s in subscribers
+    ]

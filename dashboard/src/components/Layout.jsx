@@ -27,16 +27,22 @@ function Layout({ children, user, onLogout }) {
                 </div>
 
                 <nav className="sidebar-nav">
-                    {navItems.map(item => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-                        >
-                            <item.icon size={20} />
-                            {sidebarOpen && <span>{item.label}</span>}
-                        </Link>
-                    ))}
+                    {navItems.map(item => {
+                        const label = (item.path === '/become-master' && user?.role === 'master')
+                            ? 'Trader Portal'
+                            : item.label;
+
+                        return (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                            >
+                                <item.icon size={20} />
+                                {sidebarOpen && <span>{label}</span>}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 <div className="sidebar-footer">

@@ -1,6 +1,6 @@
 import Layout from '../components/Layout'
-import { Activity, Shield, DollarSign, Send } from 'lucide-react'
-import { useState } from 'react'
+import { Activity, Shield, DollarSign, Send, Users, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import './Dashboard.css'
 import './Auth.css'
 
@@ -13,8 +13,50 @@ function BecomeMaster({ user, onLogout }) {
         monthly_fee: '99',
         bio: ''
     })
+    const [subscribers, setSubscribers] = useState([])
     const [loading, setLoading] = useState(false)
+    const [fetching, setFetching] = useState(true)
+    const [isExistingMaster, setIsExistingMaster] = useState(false)
     const [message, setMessage] = useState({ type: '', text: '' })
+
+    useEffect(() => {
+        if (user?.role === 'master') {
+            fetchMasterData()
+        } else {
+            setFetching(false)
+        }
+    }, [user])
+
+    const fetchMasterData = async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const headers = { 'Authorization': `Bearer ${token}` }
+
+            // Fetch profile
+            const profileRes = await fetch(`${API_URL}/masters/profile/me`, { headers })
+            if (profileRes.ok) {
+                const profile = await profileRes.json()
+                setFormData({
+                    display_name: profile.display_name,
+                    strategy_name: profile.strategy_name,
+                    monthly_fee: profile.monthly_fee.toString(),
+                    bio: profile.bio || ''
+                })
+                setIsExistingMaster(true)
+            }
+
+            // Fetch subscribers
+            const subsRes = await fetch(`${API_URL}/masters/my/subscribers`, { headers })
+            if (subsRes.ok) {
+                const subsData = await subsRes.json()
+                setSubscribers(subsData)
+            }
+        } catch (err) {
+            console.error('Failed to fetch master data:', err)
+        } finally {
+            setFetching(false)
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -40,17 +82,21 @@ function BecomeMaster({ user, onLogout }) {
 
             setMessage({
                 type: 'success',
-                text: 'Master profile active! You are now listed in the marketplace.'
+                text: isExistingMaster
+                    ? 'Profile updated successfully!'
+                    : 'Master profile active! You are now listed in the marketplace.'
             })
 
-            // Update local user role in localStorage
-            const updatedUser = { ...user, role: 'master' }
-            localStorage.setItem('user', JSON.stringify(updatedUser))
+            if (!isExistingMaster) {
+                // Update local user role
+                const updatedUser = { ...user, role: 'master' }
+                localStorage.setItem('user', JSON.stringify(updatedUser))
+                setIsExistingMaster(true)
 
-            // Redirect after 2 seconds
-            setTimeout(() => {
-                window.location.href = '/marketplace'
-            }, 2000)
+                setTimeout(() => {
+                    window.location.href = '/marketplace'
+                }, 2000)
+            }
         } catch (err) {
             setMessage({
                 type: 'error',
@@ -61,32 +107,34 @@ function BecomeMaster({ user, onLogout }) {
         }
     }
 
+    if (fetching) {
+        return (
+            <Layout user={user} onLogout={onLogout}>
+                <div className="loading">Loading Portal...</div>
+            </Layout>
+        )
+    }
+
     return (
         <Layout user={user} onLogout={onLogout}>
-            {/* LAYOUT FIX: 
-               We use a flex container with minHeight to force vertical centering.
-            */}
             <div className="dashboard fade-in" style={{
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
                 alignItems: 'center',
-                minHeight: '85vh', // Takes up most of the screen height
-                width: '100%'
+                minHeight: 'calc(100vh - 100px)',
+                width: '100%',
+                padding: '20px'
             }}>
 
-                {/* CONTENT WRAPPER: 
-                   Keeps the width contained and responsive (max 600px).
-                */}
-                <div style={{ width: '100%', maxWidth: '600px' }}>
+                <div style={{ width: '100%', maxWidth: '800px' }}>
 
                     <div className="page-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h1>Become a Master Trader</h1>
-                        <p>Share your trading signals and earn subscription fees</p>
+                        <h1>{isExistingMaster ? 'Master Trader Portal' : 'Become a Master Trader'}</h1>
+                        <p>{isExistingMaster ? 'Manage your public profile and subscribers' : 'Share your trading signals and earn subscription fees'}</p>
                     </div>
 
-                    <div className="auth-container" style={{ margin: '0', width: '100%' }}>
-                        <form className="auth-card glass" onSubmit={handleSubmit}>
+                    <div style={{ margin: '0 auto', width: '100%' }}>
+                        <form className="auth-card glass" style={{ maxWidth: 'none', marginBottom: '32px' }} onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label>Display Name</label>
                                 <div className="input-group">
@@ -142,9 +190,9 @@ function BecomeMaster({ user, onLogout }) {
                                         color: 'white',
                                         minHeight: '100px',
                                         marginTop: '8px',
-                                        resize: 'none' // Prevents user from breaking layout by dragging
+                                        resize: 'none'
                                     }}
-                                    placeholder="Describe your trading style and risk management..."
+                                    placeholder="Describe your trading style..."
                                     value={formData.bio}
                                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                                 />
@@ -157,14 +205,46 @@ function BecomeMaster({ user, onLogout }) {
                             )}
 
                             <button className="auth-btn" type="submit" disabled={loading}>
-                                {loading ? 'Processing...' : (
+                                {loading ? 'Saving...' : (
                                     <>
                                         <Send size={20} />
-                                        Launch Master Profile
+                                        {isExistingMaster ? 'Update Profile' : 'Launch Master Profile'}
                                     </>
                                 )}
                             </button>
                         </form>
+
+                        {isExistingMaster && (
+                            <div className="dashboard-card glass">
+                                <div className="sub-header" style={{ marginBottom: '20px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Users size={24} style={{ color: '#667eea' }} />
+                                        <h3 style={{ margin: 0 }}>My Subscribers</h3>
+                                    </div>
+                                    <span className="badge badge-success">{subscribers.length} Active</span>
+                                </div>
+
+                                <div className="status-list">
+                                    {subscribers.length === 0 ? (
+                                        <p className="text-muted" style={{ textAlign: 'center', padding: '20px' }}>No subscribers yet. Your profile is live in the marketplace!</p>
+                                    ) : (
+                                        subscribers.map(sub => (
+                                            <div key={sub.subscription_id} className="status-item">
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    <span style={{ color: 'white', fontWeight: 500 }}>{sub.email}</span>
+                                                    <span className="text-muted" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <Clock size={12} /> Joined {new Date(sub.created_at).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <span className={`badge ${sub.is_active ? 'badge-success' : 'badge-danger'}`}>
+                                                    {sub.state}
+                                                </span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

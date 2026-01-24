@@ -11,11 +11,16 @@ import Protection from './pages/Protection'
 import './index.css'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('token')
+  })
+  const [user, setUser] = useState(() => {
+    const userData = localStorage.getItem('user')
+    return userData ? JSON.parse(userData) : null
+  })
 
   useEffect(() => {
-    // Check if user is logged in (check localStorage for token)
+    // Sync state if localStorage changes (optional but good for multi-tab)
     const token = localStorage.getItem('token')
     const userData = localStorage.getItem('user')
     if (token && userData) {
