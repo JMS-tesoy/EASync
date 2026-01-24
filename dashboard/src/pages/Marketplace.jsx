@@ -3,7 +3,7 @@ import { TrendingUp, Users, Star, DollarSign, Activity, Plus } from 'lucide-reac
 import { useState, useEffect } from 'react'
 import './Marketplace.css'
 
-const API_URL = 'http://localhost:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 // Mock master traders data (in production, this would come from API)
 const MOCK_MASTERS = [

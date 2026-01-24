@@ -3,11 +3,13 @@ import { Users, Plus, Pause, Play, Download, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import './Dashboard.css'
 
-const API_URL = 'http://localhost:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 function Subscriptions({ user, onLogout }) {
     const [subscriptions, setSubscriptions] = useState([])
     const [loading, setLoading] = useState(true)
+    const [message, setMessage] = useState({ type: '', text: '' })
+    const [actionLoading, setActionLoading] = useState(null)
 
     useEffect(() => {
         fetchSubscriptions()
@@ -21,7 +23,6 @@ function Subscriptions({ user, onLogout }) {
             })
 
             if (res.status === 401) {
-                // Token expired or invalid
                 localStorage.removeItem('token')
                 localStorage.removeItem('user')
                 window.location.href = '/login'
@@ -31,15 +32,81 @@ function Subscriptions({ user, onLogout }) {
             const data = await res.json()
             if (Array.isArray(data)) {
                 setSubscriptions(data)
-            } else {
-                console.error('Unexpected subscriptions response:', data)
-                setSubscriptions([])
             }
         } catch (err) {
             console.error('Failed to fetch subscriptions:', err)
-            setSubscriptions([])
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handlePause = async (subscriptionId) => {
+        setActionLoading(subscriptionId)
+        setMessage({ type: '', text: '' })
+        console.log(`[Diagnostic] Attempting to PAUSE subscription: ${subscriptionId}`)
+
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`${API_URL}/subscriptions/${subscriptionId}/pause/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+
+            console.log(`[Diagnostic] Pause Response Status: ${res.status}`)
+            const data = await res.json()
+
+            if (res.ok) {
+                setMessage({ type: 'success', text: 'Signal paused successfully!' })
+                fetchSubscriptions()
+            } else {
+                console.error('[Diagnostic] Pause failed:', data)
+                setMessage({ type: 'error', text: data.detail || 'Failed to pause signal' })
+            }
+        } catch (err) {
+            console.error('[Diagnostic] Pause error:', err)
+            setMessage({ type: 'error', text: `Network error: ${err.message}` })
+        } finally {
+            setActionLoading(null)
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000)
+        }
+    }
+
+    const handleResume = async (subscriptionId) => {
+        setActionLoading(subscriptionId)
+        setMessage({ type: '', text: '' })
+        console.log(`[Diagnostic] Attempting to RESUME subscription: ${subscriptionId}`)
+
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`${API_URL}/subscriptions/${subscriptionId}/resume/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+
+            console.log(`[Diagnostic] Resume Response Status: ${res.status}`)
+            const data = await res.json()
+
+            if (res.ok) {
+                setMessage({ type: 'success', text: 'Signal resumed successfully!' })
+                fetchSubscriptions()
+            } else {
+                console.error('[Diagnostic] Resume failed:', data)
+                setMessage({ type: 'error', text: data.detail || 'Failed to resume signal' })
+            }
+        } catch (err) {
+            console.error('[Diagnostic] Resume error:', err)
+            setMessage({ type: 'error', text: `Network error: ${err.message}` })
+        } finally {
+            setActionLoading(null)
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000)
         }
     }
 
@@ -50,6 +117,12 @@ function Subscriptions({ user, onLogout }) {
                     <h1>Subscriptions</h1>
                     <p>Manage your master trader subscriptions</p>
                 </div>
+
+                {message.text && (
+                    <div className={`message ${message.type === 'success' ? 'success-message' : 'error-message'}`} style={{ marginBottom: '32px' }}>
+                        {message.text}
+                    </div>
+                )}
 
                 {loading ? (
                     <div className="loading">Loading...</div>
@@ -110,14 +183,24 @@ function Subscriptions({ user, onLogout }) {
 
                                         <div className="master-footer" style={{ border: 'none', paddingTop: 0, justifyContent: 'center' }}>
                                             {sub.state === 'PAUSED_USER' ? (
-                                                <button className="btn-subscribe" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                                <button
+                                                    className="btn-subscribe"
+                                                    style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}
+                                                    onClick={() => handleResume(sub.subscription_id)}
+                                                    disabled={actionLoading === sub.subscription_id}
+                                                >
                                                     <Play size={18} />
-                                                    Resume Trading
+                                                    {actionLoading === sub.subscription_id ? 'Resuming...' : 'Resume Trading'}
                                                 </button>
                                             ) : (
-                                                <button className="btn-subscribe" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                                <button
+                                                    className="btn-subscribe"
+                                                    style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                                                    onClick={() => handlePause(sub.subscription_id)}
+                                                    disabled={actionLoading === sub.subscription_id}
+                                                >
                                                     <Pause size={18} />
-                                                    Pause Signals
+                                                    {actionLoading === sub.subscription_id ? 'Pausing...' : 'Pause Signals'}
                                                 </button>
                                             )}
                                         </div>

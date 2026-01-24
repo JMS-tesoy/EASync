@@ -190,7 +190,7 @@ async def get_subscription(
     )
 
 
-@router.post("/subscriptions/{subscription_id}/pause")
+@router.post("/subscriptions/{subscription_id}/pause/")
 async def pause_subscription(
     subscription_id: str,
     user_id: str = Depends(get_current_user_id),
@@ -234,7 +234,7 @@ async def pause_subscription(
     return {"message": "Subscription paused successfully"}
 
 
-@router.post("/subscriptions/{subscription_id}/resume")
+@router.post("/subscriptions/{subscription_id}/resume/")
 async def resume_subscription(
     subscription_id: str,
     user_id: str = Depends(get_current_user_id),

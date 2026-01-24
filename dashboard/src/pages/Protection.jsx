@@ -3,7 +3,7 @@ import { Shield, AlertTriangle, Clock } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import './Dashboard.css'
 
-const API_URL = 'http://localhost:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 function Protection({ user, onLogout }) {
     const [events, setEvents] = useState([])

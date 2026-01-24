@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { LogIn, Mail, Lock, TrendingUp } from 'lucide-react'
 import './Auth.css'
 
-const API_URL = 'http://localhost:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 function Login({ onLogin }) {
     const [email, setEmail] = useState('')

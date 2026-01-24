@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import './Dashboard.css'
 import './Auth.css'
 
-const API_URL = 'http://localhost:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 function BecomeMaster({ user, onLogout }) {
     const [formData, setFormData] = useState({
