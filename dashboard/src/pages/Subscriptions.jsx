@@ -117,29 +117,19 @@ function Subscriptions({ user, onLogout }) {
                                 <Shield size={24} style={{ color: '#10b981' }} />
                             </div>
                             <div className="setup-instructions" style={{ margin: '20px 0', fontSize: '0.9rem' }}>
-                                <p>1. Download both files below.</p>
-                                <p>2. Move <strong>ExecutionGuard.mqh</strong> to your MQL5/Include folder.</p>
-                                <p>3. Move <strong>SignalReceiverEA.mq5</strong> to your MQL5/Experts folder.</p>
-                                <p>4. Open the EA in MT5 and enter your License Token when prompted.</p>
+                                <p>1. Download the compiled Signal Receiver (<strong>SignalReceiverEA.ex5</strong>).</p>
+                                <p>2. Move the file to your MT5 terminal's <strong>MQL5/Experts</strong> folder.</p>
+                                <p>3. Attach the EA to any chart and enter your License Token when prompted.</p>
                             </div>
-                            <div className="sub-actions" style={{ justifyContent: 'flex-start', gap: '12px' }}>
+                            <div className="sub-actions" style={{ justifyContent: 'flex-start' }}>
                                 <a
-                                    href="http://localhost:8000/static/downloads/SignalReceiverEA.mq5"
+                                    href="http://localhost:8000/static/downloads/SignalReceiverEA.ex5"
                                     download
                                     className="btn-primary"
-                                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px' }}
+                                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
                                 >
-                                    <Download size={18} />
-                                    SignalReceiverEA.mq5
-                                </a>
-                                <a
-                                    href="http://localhost:8000/static/downloads/ExecutionGuard.mqh"
-                                    download
-                                    className="btn-secondary"
-                                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px' }}
-                                >
-                                    <Download size={18} />
-                                    ExecutionGuard.mqh
+                                    <Download size={20} />
+                                    Download SignalReceiverEA.ex5
                                 </a>
                             </div>
                         </div>
