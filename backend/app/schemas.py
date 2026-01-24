@@ -61,6 +61,7 @@ class SubscriptionResponse(BaseModel):
     subscription_id: str
     subscriber_id: str
     master_id: str
+    master_name: Optional[str] = None
     state: str
     is_active: bool
     created_at: datetime

@@ -119,11 +119,13 @@ async def get_subscriptions(
     result = await db.execute(
         text("""
             SELECT 
-                subscription_id, subscriber_id, master_id,
-                state, is_active, created_at, paused_at, paused_reason
-            FROM subscriptions
-            WHERE subscriber_id = :user_id
-            ORDER BY created_at DESC
+                s.subscription_id, s.subscriber_id, s.master_id,
+                s.state, s.is_active, s.created_at, s.paused_at, s.paused_reason,
+                m.display_name as master_name
+            FROM subscriptions s
+            LEFT JOIN master_profiles m ON s.master_id = m.user_id
+            WHERE s.subscriber_id = :user_id
+            ORDER BY s.created_at DESC
         """),
         {"user_id": user_id}
     )
@@ -134,6 +136,7 @@ async def get_subscriptions(
             subscription_id=str(row.subscription_id),
             subscriber_id=str(row.subscriber_id),
             master_id=str(row.master_id),
+            master_name=row.master_name,
             state=row.state,
             is_active=row.is_active,
             created_at=row.created_at,
@@ -156,31 +159,34 @@ async def get_subscription(
     result = await db.execute(
         text("""
             SELECT 
-                subscription_id, subscriber_id, master_id,
-                state, is_active, created_at, paused_at, paused_reason
-            FROM subscriptions
-            WHERE subscription_id = :subscription_id
-              AND subscriber_id = :user_id
+                s.subscription_id, s.subscriber_id, s.master_id,
+                s.state, s.is_active, s.created_at, s.paused_at, s.paused_reason,
+                m.display_name as master_name
+            FROM subscriptions s
+            LEFT JOIN master_profiles m ON s.master_id = m.user_id
+            WHERE s.subscription_id = :subscription_id
+              AND s.subscriber_id = :user_id
         """),
         {"subscription_id": subscription_id, "user_id": user_id}
     )
     
-    subscription = result.first()
-    if not subscription:
+    row = result.first()
+    if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subscription not found"
         )
     
     return SubscriptionResponse(
-        subscription_id=str(subscription.subscription_id),
-        subscriber_id=str(subscription.subscriber_id),
-        master_id=str(subscription.master_id),
-        state=subscription.state,
-        is_active=subscription.is_active,
-        created_at=subscription.created_at,
-        paused_at=subscription.paused_at,
-        paused_reason=subscription.paused_reason
+        subscription_id=str(row.subscription_id),
+        subscriber_id=str(row.subscriber_id),
+        master_id=str(row.master_id),
+        master_name=row.master_name,
+        state=row.state,
+        is_active=row.is_active,
+        created_at=row.created_at,
+        paused_at=row.paused_at,
+        paused_reason=row.paused_reason
     )
 
 

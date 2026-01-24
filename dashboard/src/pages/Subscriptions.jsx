@@ -75,11 +75,11 @@ function Subscriptions({ user, onLogout }) {
                                     <div key={sub.subscription_id} className="master-card glass">
                                         <div className="master-header">
                                             <div className="master-avatar">
-                                                {sub.master_id.slice(0, 2).toUpperCase()}
+                                                {(sub.master_name || 'MT').slice(0, 2).toUpperCase()}
                                             </div>
                                             <div className="master-info">
-                                                <h3>Subscription #{sub.subscription_id.slice(0, 8)}</h3>
-                                                <p className="strategy">Master ID: {sub.master_id.slice(0, 8)}</p>
+                                                <h3>{sub.master_name || `Master #${sub.master_id.slice(0, 8)}`}</h3>
+                                                <p className="strategy">Subscription #{sub.subscription_id.slice(0, 8)}</p>
                                             </div>
                                             <div className={`badge ${sub.is_active ? 'badge-success' : 'badge-danger'}`} style={{ alignSelf: 'center' }}>
                                                 {sub.is_active ? 'Active' : 'Inactive'}
