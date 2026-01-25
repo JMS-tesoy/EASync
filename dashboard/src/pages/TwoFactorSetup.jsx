@@ -203,7 +203,7 @@ function TwoFactorSetup({ user, onLogout }) {
                 {/* Header */}
                 <div className="page-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <Shield size={48} style={{ color: '#667eea', marginBottom: '16px' }} />
-                    <h1 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Two-Factor Authentication</h1>
+                    <h1>Two-Factor Authentication</h1>
                     <p className="text-muted">
                         {is2FAEnabled ? 'Your account is protected' : 'Add an extra layer of security to your account'}
                     </p>
@@ -247,56 +247,27 @@ function TwoFactorSetup({ user, onLogout }) {
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                         gap: '24px',
-                        maxWidth: '800px',
+                        maxWidth: '700px',
                         margin: '0 auto'
                     }}>
                         {/* Authenticator App Card */}
-                        <div
-                            className="dashboard-card glass"
-                            style={{
-                                textAlign: 'center',
-                                border: is2FAEnabled && currentMethod === 'totp'
-                                    ? '1px solid #10b981'
-                                    : '1px solid rgba(255,255,255,0.1)',
-                                boxShadow: is2FAEnabled && currentMethod === 'totp'
-                                    ? '0 0 20px rgba(16, 185, 129, 0.2)'
-                                    : 'none',
-                                transform: 'scale(1)',
-                                transition: 'all 0.3s ease',
-                                cursor: 'default'
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.borderColor = is2FAEnabled && currentMethod === 'totp' ? '#10b981' : 'rgba(255,255,255,0.3)' }}
-                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.borderColor = is2FAEnabled && currentMethod === 'totp' ? '#10b981' : 'rgba(255,255,255,0.1)' }}
-                        >
-                            <div style={{
-                                width: '80px', height: '80px', margin: '0 auto 20px',
-                                background: is2FAEnabled && currentMethod === 'totp'
-                                    ? 'rgba(16, 185, 129, 0.1)'
-                                    : 'rgba(255,255,255,0.05)',
-                                borderRadius: '50%',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                position: 'relative'
-                            }}>
-                                {is2FAEnabled && currentMethod === 'totp' ? (
-                                    <>
-                                        <div className="pulse" style={{
-                                            position: 'absolute', inset: 0, borderRadius: '50%',
-                                            border: '2px solid #10b981', opacity: 0.5
-                                        }}></div>
-                                        <Check size={40} style={{ color: '#10b981' }} />
-                                    </>
-                                ) : (
-                                    <Smartphone size={40} style={{ color: '#667eea' }} />
-                                )}
-                            </div>
+                        <div className="dashboard-card glass" style={{
+                            textAlign: 'center',
+                            border: is2FAEnabled && currentMethod === 'totp' ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                            {is2FAEnabled && currentMethod === 'totp' ? (
+                                <Check size={40} style={{ color: '#10b981', marginBottom: '16px' }} />
+                            ) : (
+                                <X size={40} style={{ color: '#ef4444', marginBottom: '16px' }} />
+                            )}
 
-                            <h3 style={{ marginBottom: '8px', fontSize: '1.25rem' }}>
-                                {is2FAEnabled && currentMethod === 'totp' ? 'Authenticator Active' : 'Authenticator App'}
+                            <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>
+                                {is2FAEnabled && currentMethod === 'totp' ? '2FA is Enabled' : 'Authenticator App'}
                             </h3>
-                            <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '24px', minHeight: '40px' }}>
+                            <p className="text-muted" style={{ fontSize: '13px', marginBottom: '20px' }}>
                                 {is2FAEnabled && currentMethod === 'totp'
-                                    ? 'Your account is securely protected by your authenticator app.'
-                                    : 'Use Google Authenticator, Authy, or similar apps to generate codes.'}
+                                    ? 'Your account is protected with Authenticator App'
+                                    : 'Use Google Authenticator, Authy, or similar'}
                             </p>
 
                             {is2FAEnabled && currentMethod === 'totp' ? (
@@ -304,18 +275,14 @@ function TwoFactorSetup({ user, onLogout }) {
                                     onClick={disableTwoFactor}
                                     disabled={actionLoading}
                                     style={{
-                                        width: '100%',
-                                        background: 'rgba(239, 68, 68, 0.1)',
-                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                        background: 'rgba(239, 68, 68, 0.2)',
+                                        border: '1px solid rgba(239, 68, 68, 0.4)',
                                         color: '#fca5a5',
-                                        padding: '12px',
+                                        padding: '10px 20px',
                                         borderRadius: '8px',
                                         cursor: 'pointer',
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        transition: 'all 0.2s'
+                                        fontSize: '14px'
                                     }}
-                                    className="hover-danger"
                                 >
                                     {actionLoading ? 'Disabling...' : 'Disable 2FA'}
                                 </button>
@@ -324,60 +291,31 @@ function TwoFactorSetup({ user, onLogout }) {
                                     onClick={startTOTPSetup}
                                     disabled={actionLoading}
                                     className="btn-primary"
-                                    style={{ width: '100%', padding: '12px', fontSize: '14px' }}
+                                    style={{ padding: '10px 20px', fontSize: '14px' }}
                                 >
-                                    {actionLoading ? 'Loading...' : 'Enable Authenticator'}
+                                    {actionLoading ? 'Loading...' : 'Enable'}
                                 </button>
                             )}
                         </div>
 
                         {/* Email OTP Card */}
-                        <div
-                            className="dashboard-card glass"
-                            style={{
-                                textAlign: 'center',
-                                border: is2FAEnabled && currentMethod === 'email'
-                                    ? '1px solid #10b981'
-                                    : '1px solid rgba(255,255,255,0.1)',
-                                boxShadow: is2FAEnabled && currentMethod === 'email'
-                                    ? '0 0 20px rgba(16, 185, 129, 0.2)'
-                                    : 'none',
-                                transform: 'scale(1)',
-                                transition: 'all 0.3s ease',
-                                cursor: 'default'
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.borderColor = is2FAEnabled && currentMethod === 'email' ? '#10b981' : 'rgba(255,255,255,0.3)' }}
-                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.borderColor = is2FAEnabled && currentMethod === 'email' ? '#10b981' : 'rgba(255,255,255,0.1)' }}
-                        >
-                            <div style={{
-                                width: '80px', height: '80px', margin: '0 auto 20px',
-                                background: is2FAEnabled && currentMethod === 'email'
-                                    ? 'rgba(16, 185, 129, 0.1)'
-                                    : 'rgba(255,255,255,0.05)',
-                                borderRadius: '50%',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                position: 'relative'
-                            }}>
-                                {is2FAEnabled && currentMethod === 'email' ? (
-                                    <>
-                                        <div className="pulse" style={{
-                                            position: 'absolute', inset: 0, borderRadius: '50%',
-                                            border: '2px solid #10b981', opacity: 0.5
-                                        }}></div>
-                                        <Check size={40} style={{ color: '#10b981' }} />
-                                    </>
-                                ) : (
-                                    <Mail size={40} style={{ color: '#667eea' }} />
-                                )}
-                            </div>
+                        <div className="dashboard-card glass" style={{
+                            textAlign: 'center',
+                            border: is2FAEnabled && currentMethod === 'email' ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                            {is2FAEnabled && currentMethod === 'email' ? (
+                                <Check size={40} style={{ color: '#10b981', marginBottom: '16px' }} />
+                            ) : (
+                                <X size={40} style={{ color: '#ef4444', marginBottom: '16px' }} />
+                            )}
 
-                            <h3 style={{ marginBottom: '8px', fontSize: '1.25rem' }}>
-                                {is2FAEnabled && currentMethod === 'email' ? 'Email OTP Active' : 'Email OTP'}
+                            <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>
+                                {is2FAEnabled && currentMethod === 'email' ? '2FA is Enabled' : 'Email OTP'}
                             </h3>
-                            <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '24px', minHeight: '40px' }}>
+                            <p className="text-muted" style={{ fontSize: '13px', marginBottom: '20px' }}>
                                 {is2FAEnabled && currentMethod === 'email'
-                                    ? 'Your account is securely protected by email verification.'
-                                    : `Receive 6-digit verification codes at ${user?.email}`}
+                                    ? 'Your account is protected with Email OTP'
+                                    : `Receive codes at ${user?.email}`}
                             </p>
 
                             {is2FAEnabled && currentMethod === 'email' ? (
@@ -385,18 +323,14 @@ function TwoFactorSetup({ user, onLogout }) {
                                     onClick={disableTwoFactor}
                                     disabled={actionLoading}
                                     style={{
-                                        width: '100%',
-                                        background: 'rgba(239, 68, 68, 0.1)',
-                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                        background: 'rgba(239, 68, 68, 0.2)',
+                                        border: '1px solid rgba(239, 68, 68, 0.4)',
                                         color: '#fca5a5',
-                                        padding: '12px',
+                                        padding: '10px 20px',
                                         borderRadius: '8px',
                                         cursor: 'pointer',
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        transition: 'all 0.2s'
+                                        fontSize: '14px'
                                     }}
-                                    className="hover-danger"
                                 >
                                     {actionLoading ? 'Disabling...' : 'Disable 2FA'}
                                 </button>
@@ -405,9 +339,9 @@ function TwoFactorSetup({ user, onLogout }) {
                                     onClick={startEmailOTPSetup}
                                     disabled={actionLoading}
                                     className="btn-primary"
-                                    style={{ width: '100%', padding: '12px', fontSize: '14px' }}
+                                    style={{ padding: '10px 20px', fontSize: '14px' }}
                                 >
-                                    {actionLoading ? 'Loading...' : 'Enable Email OTP'}
+                                    {actionLoading ? 'Loading...' : 'Enable'}
                                 </button>
                             )}
                         </div>
