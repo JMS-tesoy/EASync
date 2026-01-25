@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union, Any
 import uuid
+import secrets
 from jose import JWTError, jwt
 import bcrypt  # Replaces passlib
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -76,7 +77,7 @@ router = APIRouter()
 @router.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
     """
-    Register a new user.
+    Register a new user. Sends verification email.
     """
     # Check if email already exists
     result = await db.execute(
@@ -89,23 +90,29 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Generate user ID
+    # Generate user ID and verification token
     user_id = str(uuid.uuid4())
+    verification_token = secrets.token_urlsafe(32)
+    verification_expires = datetime.utcnow() + timedelta(hours=24)
     
     # Hash password
     hashed_password = get_password_hash(user_data.password)
     
-    # Insert user
+    # Insert user with verification fields
     await db.execute(
         text("""
-            INSERT INTO users (user_id, email, password_hash, full_name, trust_score, is_active)
-            VALUES (:user_id, :email, :password_hash, :full_name, 100, TRUE)
+            INSERT INTO users (user_id, email, password_hash, full_name, trust_score, is_active, 
+                               email_verified, verification_token, verification_expires)
+            VALUES (:user_id, :email, :password_hash, :full_name, 100, TRUE,
+                    FALSE, :verification_token, :verification_expires)
         """),
         {
             "user_id": user_id,
             "email": user_data.email,
             "password_hash": hashed_password,
-            "full_name": user_data.full_name
+            "full_name": user_data.full_name,
+            "verification_token": verification_token,
+            "verification_expires": verification_expires
         }
     )
     
@@ -120,10 +127,17 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
     
     await db.commit()
     
+    # Send verification email (async, don't block)
+    try:
+        from app.services.email_service import send_verification_email
+        await send_verification_email(user_data.email, verification_token, user_data.full_name)
+    except Exception as e:
+        print(f"[Auth] Failed to send verification email: {e}")
+    
     # Fetch created user
     result = await db.execute(
         text("""
-            SELECT user_id, email, full_name, trust_score, is_active, created_at
+            SELECT user_id, email, full_name, trust_score, is_active, created_at, email_verified
             FROM users
             WHERE user_id = :user_id
         """),
@@ -137,7 +151,8 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         full_name=user.full_name,
         trust_score=user.trust_score,
         is_active=user.is_active,
-        created_at=user.created_at
+        created_at=user.created_at,
+        email_verified=user.email_verified
     )
 
 @router.post("/auth/login", response_model=LoginResponse)

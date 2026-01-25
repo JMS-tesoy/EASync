@@ -43,6 +43,9 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
     role: str = "user"  # "user" or "master"
+    email_verified: bool = False
+    two_fa_enabled: bool = False
+    two_fa_method: Optional[str] = None  # "email", "totp", or None
     
     class Config:
         from_attributes = True
@@ -53,6 +56,57 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: Optional[UserResponse] = None
+    requires_2fa: bool = False
+    two_fa_method: Optional[str] = None
+
+
+# ============================================================================
+# Security Schemas
+# ============================================================================
+
+class EmailVerifyRequest(BaseModel):
+    """Email verification request"""
+    token: str
+
+
+class ResendVerificationRequest(BaseModel):
+    """Resend verification email request"""
+    email: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Forgot password request"""
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    """Reset password with token"""
+    token: str
+    new_password: str = Field(..., min_length=8)
+
+
+class TwoFASetupResponse(BaseModel):
+    """2FA setup response with QR code"""
+    secret: str
+    qr_code: str  # Base64 encoded QR code image
+    backup_codes: list[str]
+
+
+class TwoFAVerifyRequest(BaseModel):
+    """Verify 2FA code"""
+    code: str
+    method: str = "totp"  # "totp" or "email"
+
+
+class TwoFAEnableRequest(BaseModel):
+    """Enable 2FA request"""
+    method: str  # "totp" or "email"
+    code: str  # Verification code to confirm setup
+
+
+class OTPRequest(BaseModel):
+    """Request OTP via email"""
+    email: str
 
 
 # ============================================================================

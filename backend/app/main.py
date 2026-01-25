@@ -14,7 +14,7 @@ import os
 
 from app.config import settings
 from app.database import init_db, close_db
-from app.api import auth, subscriptions, wallets, protection, masters, signals
+from app.api import auth, subscriptions, wallets, protection, masters, signals, security
 
 # Configure logging
 logging.basicConfig(
@@ -93,6 +93,7 @@ async def root():
 
 # Mount API routers
 app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
+app.include_router(security.router, prefix="/api/v1", tags=["Security"])
 app.include_router(subscriptions.router, prefix="/api/v1", tags=["Subscriptions"])
 app.include_router(wallets.router, prefix="/api/v1", tags=["Wallets"])
 app.include_router(protection.router, prefix="/api/v1", tags=["Protection"])

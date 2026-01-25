@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X, Activity, TrendingUp, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X, Activity, TrendingUp, BarChart3, Lock } from 'lucide-react'
 import { useState } from 'react'
 import './Layout.css'
 
@@ -26,6 +26,7 @@ function Layout({ children, user, onLogout }) {
         masterNavItem,
         { path: '/wallet', icon: CreditCard, label: 'Wallet' },
         { path: '/protection', icon: Activity, label: 'Protection' },
+        { path: '/security/2fa', icon: Lock, label: 'Security' },
     ]
 
     return (

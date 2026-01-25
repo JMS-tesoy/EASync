@@ -9,6 +9,10 @@ import BecomeMaster from './pages/BecomeMaster'
 import MasterDashboard from './pages/MasterDashboard'
 import Wallet from './pages/Wallet'
 import Protection from './pages/Protection'
+import VerifyEmail from './pages/VerifyEmail'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import TwoFactorSetup from './pages/TwoFactorSetup'
 import './index.css'
 
 function App() {
@@ -47,6 +51,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Auth Routes */}
         <Route
           path="/login"
           element={
@@ -63,6 +68,11 @@ function App() {
               <Register onRegister={handleLogin} />
           }
         />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -116,6 +126,14 @@ function App() {
           element={
             isAuthenticated ?
               <Protection user={user} onLogout={handleLogout} /> :
+              <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/security/2fa"
+          element={
+            isAuthenticated ?
+              <TwoFactorSetup user={user} onLogout={handleLogout} /> :
               <Navigate to="/login" />
           }
         />
