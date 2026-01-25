@@ -16,12 +16,19 @@ from typing import Optional
 from app.config import settings
 
 
-# Configure Resend with API key from settings
-# You'll need to set RESEND_API_KEY in your .env file
-resend.api_key = getattr(settings, 'resend_api_key', None) or "re_placeholder_key"
+def get_resend_client():
+    """Get configured Resend client."""
+    api_key = settings.resend_api_key
+    if not api_key or api_key == "re_your_key_here":
+        print("[Email Service] WARNING: RESEND_API_KEY not configured!")
+        return None
+    resend.api_key = api_key
+    return resend
 
-# Default sender email (must be verified in Resend dashboard)
-DEFAULT_SENDER = getattr(settings, 'email_from', 'noreply@easync.com')
+
+def get_sender():
+    """Get sender email from settings."""
+    return settings.email_from or "EA Sync <onboarding@resend.dev>"
 
 
 def generate_token(length: int = 32) -> str:
@@ -42,6 +49,11 @@ async def send_verification_email(
     """
     Send email verification link to new user.
     """
+    client = get_resend_client()
+    if not client:
+        print(f"[Email Service] Cannot send verification email - API key not configured")
+        return False
+        
     verification_url = f"{settings.frontend_url}/verify-email?token={verification_token}"
     
     html_content = f"""
@@ -85,14 +97,18 @@ async def send_verification_email(
     """
     
     try:
+        sender = get_sender()
+        print(f"[Email Service] Sending verification email to {to_email} from {sender}")
+        
         params = {
-            "from": DEFAULT_SENDER,
+            "from": sender,
             "to": [to_email],
             "subject": "Verify your EA Sync account",
             "html": html_content
         }
         
-        email = resend.Emails.send(params)
+        result = client.Emails.send(params)
+        print(f"[Email Service] Email sent successfully! ID: {result}")
         return True
     except Exception as e:
         print(f"[Email Service] Failed to send verification email: {e}")
@@ -107,6 +123,11 @@ async def send_otp_email(
     """
     Send OTP code for 2FA verification.
     """
+    client = get_resend_client()
+    if not client:
+        print(f"[Email Service] Cannot send OTP email - API key not configured")
+        return False
+        
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -147,14 +168,18 @@ async def send_otp_email(
     """
     
     try:
+        sender = get_sender()
+        print(f"[Email Service] Sending OTP email to {to_email}")
+        
         params = {
-            "from": DEFAULT_SENDER,
+            "from": sender,
             "to": [to_email],
             "subject": f"Your EA Sync verification code: {otp_code}",
             "html": html_content
         }
         
-        email = resend.Emails.send(params)
+        result = client.Emails.send(params)
+        print(f"[Email Service] OTP email sent! ID: {result}")
         return True
     except Exception as e:
         print(f"[Email Service] Failed to send OTP email: {e}")
@@ -169,6 +194,11 @@ async def send_password_reset_email(
     """
     Send password reset link.
     """
+    client = get_resend_client()
+    if not client:
+        print(f"[Email Service] Cannot send password reset email - API key not configured")
+        return False
+        
     reset_url = f"{settings.frontend_url}/reset-password?token={reset_token}"
     
     html_content = f"""
@@ -211,14 +241,18 @@ async def send_password_reset_email(
     """
     
     try:
+        sender = get_sender()
+        print(f"[Email Service] Sending password reset email to {to_email}")
+        
         params = {
-            "from": DEFAULT_SENDER,
+            "from": sender,
             "to": [to_email],
             "subject": "Reset your EA Sync password",
             "html": html_content
         }
         
-        email = resend.Emails.send(params)
+        result = client.Emails.send(params)
+        print(f"[Email Service] Password reset email sent! ID: {result}")
         return True
     except Exception as e:
         print(f"[Email Service] Failed to send password reset email: {e}")
@@ -270,14 +304,21 @@ async def send_security_alert_email(
     """
     
     try:
+        client = get_resend_client()
+        if not client:
+            print(f"[Email Service] Cannot send security alert - API key not configured")
+            return False
+            
+        sender = get_sender()
         params = {
-            "from": DEFAULT_SENDER,
+            "from": sender,
             "to": [to_email],
             "subject": f"Security Alert: {alert_type}",
             "html": html_content
         }
         
-        email = resend.Emails.send(params)
+        result = client.Emails.send(params)
+        print(f"[Email Service] Security alert sent! ID: {result}")
         return True
     except Exception as e:
         print(f"[Email Service] Failed to send security alert: {e}")

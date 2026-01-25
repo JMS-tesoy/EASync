@@ -89,3 +89,5 @@ Thumbs.db
 MQL4/Experts/Advisors/*.mq4
 MQL5/Experts/Advisors/*.mq5
 backend/app/ea_source/
+
+.env
