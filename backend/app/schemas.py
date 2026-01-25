@@ -238,6 +238,19 @@ class MasterProfileResponse(BaseModel):
     avg_profit: Decimal
     verified: bool
     created_at: datetime
+    performance_history: Optional[list[float]] = []
     
     class Config:
         from_attributes = True
+
+
+class TradeReport(BaseModel):
+    """Report a closed trade result"""
+    symbol: str
+    order_type: int  # 1=BUY, 2=SELL
+    open_price: Decimal
+    close_price: Decimal
+    profit: Decimal
+    opened_at: datetime
+    closed_at: datetime
+

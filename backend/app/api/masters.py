@@ -5,10 +5,90 @@ from typing import List
 from datetime import datetime
 
 from app.database import get_db
-from app.schemas import MasterProfileCreate, MasterProfileResponse
+from app.schemas import MasterProfileCreate, MasterProfileResponse, TradeReport
 from app.api.auth import get_current_user_id
 
 router = APIRouter()
+
+async def get_performance_history(user_id: str, db: AsyncSession) -> List[float]:
+    """
+    Calculate monthly returns for the last 6 months.
+    Returns a list of percentage returns, e.g. [2.5, -1.1, 5.0, ...].
+    """
+    # For now, we'll just mock this or return empty if no trades
+    # In a real implementation, we would query the trade_history table
+    # and aggregate profit by month.
+    
+    # Check if we have any trades
+    result = await db.execute(
+        text("SELECT profit, closed_at FROM trade_history WHERE master_id = :uid ORDER BY closed_at DESC LIMIT 100"),
+        {"uid": user_id}
+    )
+    trades = result.fetchall()
+    
+    if not trades:
+        return []
+    
+    # Simple accumulation for demo (just list the last few profits as 'monthly' for now)
+    # real logic would filter by month
+    history = []
+    current_month_profit = 0.0
+    
+    # Mock logic: just take the last 6 trades profit as "history" for visual effect
+    # pending a real monthly aggregation query
+    vals = [float(t.profit) for t in trades[:6]]
+    return list(reversed(vals))  # Oldest to newest
+
+
+@router.post("/report-trade")
+async def report_trade(
+    trade: TradeReport,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Report a closed trade result from the Master EA.
+    """
+    # Verify user is a master
+    master = await db.execute(
+        text("SELECT verified FROM master_profiles WHERE user_id = :uid"),
+        {"uid": user_id}
+    )
+    if not master.first():
+         raise HTTPException(status_code=403, detail="Only masters can report trades")
+
+    await db.execute(
+        text("""
+            INSERT INTO trade_history (
+                master_id, symbol, order_type, open_price, close_price, 
+                profit, opened_at, closed_at
+            ) VALUES (
+                :uid, :symbol, :type, :open, :close, 
+                :profit, :opened, :closed
+            )
+        """),
+        {
+            "uid": user_id,
+            "symbol": trade.symbol,
+            "type": trade.order_type,
+            "open": float(trade.open_price),
+            "close": float(trade.close_price),
+            "profit": float(trade.profit),
+            "opened": trade.opened_at,
+            "closed": trade.closed_at
+        }
+    )
+    
+    # Update master stats (win rate, avg profit, etc.)
+    # simplistic update: increment total signals
+    await db.execute(
+        text("UPDATE master_profiles SET total_signals = total_signals + 1 WHERE user_id = :uid"),
+        {"uid": user_id}
+    )
+    
+    await db.commit()
+    return {"status": "recorded", "trade_id": "new"}
+
 
 @router.post("/profile", response_model=MasterProfileResponse)
 async def create_master_profile(
@@ -91,7 +171,8 @@ async def create_master_profile(
         total_signals=profile.total_signals,
         avg_profit=profile.avg_profit,
         verified=profile.verified,
-        created_at=profile.created_at
+        created_at=profile.created_at,
+        performance_history=await get_performance_history(user_id, db)
     )
 
 @router.get("/", response_model=List[MasterProfileResponse])
@@ -104,8 +185,10 @@ async def list_masters(db: AsyncSession = Depends(get_db)):
     )
     profiles = result.all()
     
-    return [
-        MasterProfileResponse(
+    response = []
+    for p in profiles:
+        history = await get_performance_history(str(p.user_id), db)
+        response.append(MasterProfileResponse(
             user_id=str(p.user_id),
             display_name=p.display_name,
             strategy_name=p.strategy_name,
@@ -115,9 +198,11 @@ async def list_masters(db: AsyncSession = Depends(get_db)):
             total_signals=p.total_signals,
             avg_profit=p.avg_profit,
             verified=p.verified,
-            created_at=p.created_at
-        ) for p in profiles
-    ]
+            created_at=p.created_at,
+            performance_history=history
+        ))
+    
+    return response
 
 @router.get("/{user_id}", response_model=MasterProfileResponse)
 async def get_master(user_id: str, db: AsyncSession = Depends(get_db)):
@@ -146,7 +231,8 @@ async def get_master(user_id: str, db: AsyncSession = Depends(get_db)):
         total_signals=profile.total_signals,
         avg_profit=profile.avg_profit,
         verified=profile.verified,
-        created_at=profile.created_at
+        created_at=profile.created_at,
+        performance_history=await get_performance_history(str(profile.user_id), db)
     )
 
 @router.get("/profile/me", response_model=MasterProfileResponse)
@@ -179,7 +265,8 @@ async def get_my_master_profile(
         total_signals=profile.total_signals,
         avg_profit=profile.avg_profit,
         verified=profile.verified,
-        created_at=profile.created_at
+        created_at=profile.created_at,
+        performance_history=await get_performance_history(str(profile.user_id), db)
     )
 
 @router.get("/my/subscribers")

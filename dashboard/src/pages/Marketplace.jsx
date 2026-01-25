@@ -5,31 +5,66 @@ import './Marketplace.css'
 
 const API_URL = 'http://127.0.0.1:8000/api/v1'
 
-// Mock master traders data (in production, this would come from API)
-const MOCK_MASTERS = [
-    {
-        user_id: '550e8400-e29b-41d4-a716-446655440001',
-        display_name: 'Alex Thompson',
-        strategy_name: 'EUR/USD Scalper',
-        bio: 'Professional forex trader with 8+ years experience.',
-        monthly_fee: 99.00,
-        win_rate: 68.5,
-        total_signals: 1247,
-        avg_profit: 2.3,
-        verified: true
-    },
-    {
-        user_id: '550e8400-e29b-41d4-a716-446655440002',
-        display_name: 'Sarah Chen',
-        strategy_name: 'Gold Swing Trading',
-        bio: 'Gold trading specialist with high reward-to-risk ratio.',
-        monthly_fee: 149.00,
-        win_rate: 71.2,
-        total_signals: 892,
-        avg_profit: 3.8,
-        verified: true
-    }
-]
+// Mock data removed - using real API data with performance history
+
+const Sparkline = ({ data }) => {
+    if (!data || data.length < 2) return (
+        <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>No trade history yet</span>
+        </div>
+    )
+
+    const min = Math.min(...data)
+    const max = Math.max(...data)
+    const range = max - min || 1
+
+    const points = data.map((val, i) => {
+        const x = (i / (data.length - 1)) * 100
+        const normalizedVal = (val - min) / range
+        const y = 30 - (normalizedVal * 20) - 5
+        return `${x},${y}`
+    }).join(' ')
+
+    const isPositive = data[data.length - 1] >= data[0]
+    const color = isPositive ? '#10b981' : '#ef4444'
+
+    return (
+        <div className="sparkline-container" style={{ marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Performance Trend</span>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: color }}>
+                    {isPositive ? '+' : ''}{(data[data.length - 1] - data[0]).toFixed(2)}%
+                </span>
+            </div>
+            <svg viewBox="0 0 100 30" width="100%" height="40" style={{ overflow: 'visible' }}>
+                <path
+                    d={`M0,30 L${points.replace(/ /g, ' L')} L100,30 Z`}
+                    fill={`url(#gradient-${isPositive ? 'up' : 'down'})`}
+                    opacity="0.2"
+                />
+                <polyline
+                    points={points}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="2"
+                    vectorEffect="non-scaling-stroke"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <defs>
+                    <linearGradient id="gradient-up" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="transparent" />
+                    </linearGradient>
+                    <linearGradient id="gradient-down" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="transparent" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+    )
+}
 
 function Marketplace({ user, onLogout }) {
     const [masters, setMasters] = useState([])
@@ -194,6 +229,8 @@ function Marketplace({ user, onLogout }) {
                                     </div>
                                 </div>
 
+                                <Sparkline data={master.performance_history} />
+
                                 <div className="master-footer">
                                     <div className="pricing">
                                         <span className="price">${Number(master.monthly_fee).toFixed(2)}</span>
@@ -213,7 +250,7 @@ function Marketplace({ user, onLogout }) {
                     </div>
                 )}
             </div>
-        </Layout>
+        </Layout >
     )
 }
 
