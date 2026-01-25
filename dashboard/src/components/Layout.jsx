@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X, Activity, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, CreditCard, Shield, Users, LogOut, Menu, X, Activity, TrendingUp, BarChart3 } from 'lucide-react'
 import { useState } from 'react'
 import './Layout.css'
 
@@ -7,11 +7,23 @@ function Layout({ children, user, onLogout }) {
     const location = useLocation()
     const [sidebarOpen, setSidebarOpen] = useState(true)
 
-    const navItems = [
+    const isMaster = user?.role === 'master'
+
+    // Base navigation items
+    const baseNavItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/marketplace', icon: TrendingUp, label: 'Marketplace' },
         { path: '/subscriptions', icon: Users, label: 'Subscriptions' },
-        { path: '/become-master', icon: Shield, label: 'Become a Master' },
+    ]
+
+    // Add Master Dashboard for master users, or Become Master for non-masters
+    const masterNavItem = isMaster
+        ? { path: '/master-dashboard', icon: BarChart3, label: 'Master Dashboard' }
+        : { path: '/become-master', icon: Shield, label: 'Become a Master' }
+
+    const navItems = [
+        ...baseNavItems,
+        masterNavItem,
         { path: '/wallet', icon: CreditCard, label: 'Wallet' },
         { path: '/protection', icon: Activity, label: 'Protection' },
     ]
@@ -27,22 +39,16 @@ function Layout({ children, user, onLogout }) {
                 </div>
 
                 <nav className="sidebar-nav">
-                    {navItems.map(item => {
-                        const label = (item.path === '/become-master' && user?.role === 'master')
-                            ? 'Trader Portal'
-                            : item.label;
-
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-                            >
-                                <item.icon size={20} />
-                                {sidebarOpen && <span>{label}</span>}
-                            </Link>
-                        );
-                    })}
+                    {navItems.map(item => (
+                        <Link
+                            key={item.path}
+                            to={item.path}
+                            className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                        >
+                            <item.icon size={20} />
+                            {sidebarOpen && <span>{item.label}</span>}
+                        </Link>
+                    ))}
                 </nav>
 
                 <div className="sidebar-footer">

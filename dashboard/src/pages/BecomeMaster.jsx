@@ -1,5 +1,5 @@
 import Layout from '../components/Layout'
-import { Activity, Shield, DollarSign, Send, Users, Clock } from 'lucide-react'
+import { Activity, Shield, DollarSign, Send, Users, Clock, Download, Key, Copy, Check } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import './Dashboard.css'
 import './Auth.css'
@@ -18,6 +18,13 @@ function BecomeMaster({ user, onLogout }) {
     const [fetching, setFetching] = useState(true)
     const [isExistingMaster, setIsExistingMaster] = useState(false)
     const [message, setMessage] = useState({ type: '', text: '' })
+    const [copiedToken, setCopiedToken] = useState(null)
+
+    const copyToClipboard = (text, tokenId) => {
+        navigator.clipboard.writeText(text)
+        setCopiedToken(tokenId)
+        setTimeout(() => setCopiedToken(null), 2000)
+    }
 
     useEffect(() => {
         if (user?.role === 'master') {
@@ -121,20 +128,22 @@ function BecomeMaster({ user, onLogout }) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                minHeight: 'calc(100vh - 100px)',
+                justifyContent: 'center',
+                height: 'calc(100vh - 80px)',
                 width: '100%',
-                padding: '20px'
+                padding: '20px',
+                overflow: 'hidden'
             }}>
 
-                <div style={{ width: '100%', maxWidth: '800px' }}>
+                <div style={{ width: '100%', maxWidth: '600px' }}>
 
-                    <div className="page-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h1>{isExistingMaster ? 'Master Trader Portal' : 'Become a Master Trader'}</h1>
-                        <p>{isExistingMaster ? 'Manage your public profile and subscribers' : 'Share your trading signals and earn subscription fees'}</p>
+                    <div className="page-header" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                        <h1 style={{ fontSize: '1.8rem' }}>{isExistingMaster ? 'Edit Master Profile' : 'Become a Master Trader'}</h1>
+                        <p style={{ fontSize: '0.9rem' }}>{isExistingMaster ? 'Update your public profile' : 'Share your trading signals and earn subscription fees'}</p>
                     </div>
 
                     <div style={{ margin: '0 auto', width: '100%' }}>
-                        <form className="auth-card glass" style={{ maxWidth: 'none', marginBottom: '32px' }} onSubmit={handleSubmit}>
+                        <form className="auth-card glass" style={{ maxWidth: 'none', marginBottom: '0', padding: '24px' }} onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label>Display Name</label>
                                 <div className="input-group">
@@ -212,39 +221,23 @@ function BecomeMaster({ user, onLogout }) {
                                     </>
                                 )}
                             </button>
+
+                            {isExistingMaster && (
+                                <a
+                                    href="/master-dashboard"
+                                    style={{
+                                        display: 'block',
+                                        textAlign: 'center',
+                                        marginTop: '16px',
+                                        color: '#667eea',
+                                        textDecoration: 'none',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    ← Back to Master Dashboard
+                                </a>
+                            )}
                         </form>
-
-                        {isExistingMaster && (
-                            <div className="dashboard-card glass">
-                                <div className="sub-header" style={{ marginBottom: '20px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <Users size={24} style={{ color: '#667eea' }} />
-                                        <h3 style={{ margin: 0 }}>My Subscribers</h3>
-                                    </div>
-                                    <span className="badge badge-success">{subscribers.length} Active</span>
-                                </div>
-
-                                <div className="status-list">
-                                    {subscribers.length === 0 ? (
-                                        <p className="text-muted" style={{ textAlign: 'center', padding: '20px' }}>No subscribers yet. Your profile is live in the marketplace!</p>
-                                    ) : (
-                                        subscribers.map(sub => (
-                                            <div key={sub.subscription_id} className="status-item">
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                    <span style={{ color: 'white', fontWeight: 500 }}>{sub.email}</span>
-                                                    <span className="text-muted" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <Clock size={12} /> Joined {new Date(sub.created_at).toLocaleDateString()}
-                                                    </span>
-                                                </div>
-                                                <span className={`badge ${sub.is_active ? 'badge-success' : 'badge-danger'}`}>
-                                                    {sub.state}
-                                                </span>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

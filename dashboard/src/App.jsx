@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Subscriptions from './pages/Subscriptions'
 import Marketplace from './pages/Marketplace'
 import BecomeMaster from './pages/BecomeMaster'
+import MasterDashboard from './pages/MasterDashboard'
 import Wallet from './pages/Wallet'
 import Protection from './pages/Protection'
 import './index.css'
@@ -91,6 +92,14 @@ function App() {
           element={
             isAuthenticated ?
               <BecomeMaster user={user} onLogout={handleLogout} /> :
+              <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/master-dashboard"
+          element={
+            isAuthenticated ?
+              <MasterDashboard user={user} onLogout={handleLogout} /> :
               <Navigate to="/login" />
           }
         />

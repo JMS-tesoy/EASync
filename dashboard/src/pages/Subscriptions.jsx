@@ -1,5 +1,5 @@
 import Layout from '../components/Layout'
-import { Users, Plus, Pause, Play, Download, Shield } from 'lucide-react'
+import { Users, Plus, Pause, Play, Download, Shield, Key, Copy, Check } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import './Dashboard.css'
 
@@ -10,6 +10,13 @@ function Subscriptions({ user, onLogout }) {
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState({ type: '', text: '' })
     const [actionLoading, setActionLoading] = useState(null)
+    const [copiedToken, setCopiedToken] = useState(null)
+
+    const copyToClipboard = (text, tokenId) => {
+        navigator.clipboard.writeText(text)
+        setCopiedToken(tokenId)
+        setTimeout(() => setCopiedToken(null), 2000)
+    }
 
     useEffect(() => {
         fetchSubscriptions()
@@ -181,7 +188,81 @@ function Subscriptions({ user, onLogout }) {
                                             </div>
                                         </div>
 
-                                        <div className="master-footer" style={{ border: 'none', paddingTop: 0, justifyContent: 'center' }}>
+                                        {/* EA Configuration Section */}
+                                        <div style={{
+                                            background: 'rgba(102, 126, 234, 0.1)',
+                                            borderRadius: '12px',
+                                            padding: '16px',
+                                            marginTop: '16px',
+                                            border: '1px solid rgba(102, 126, 234, 0.2)'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                                <Key size={16} style={{ color: '#667eea' }} />
+                                                <span style={{ fontSize: '13px', fontWeight: '600', color: '#667eea' }}>EA Configuration</span>
+                                            </div>
+
+                                            <div style={{ marginBottom: '12px' }}>
+                                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>License Token</p>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <code style={{
+                                                        fontSize: '12px',
+                                                        background: 'rgba(0,0,0,0.3)',
+                                                        padding: '8px 12px',
+                                                        borderRadius: '6px',
+                                                        flex: 1,
+                                                        wordBreak: 'break-all',
+                                                        color: '#10b981'
+                                                    }}>
+                                                        {sub.license_token || `TEST-LICENSE-${sub.subscription_id.slice(0, 8)}`}
+                                                    </code>
+                                                    <button
+                                                        onClick={() => copyToClipboard(sub.license_token || `TEST-LICENSE-${sub.subscription_id.slice(0, 8)}`, `license-${sub.subscription_id}`)}
+                                                        style={{
+                                                            background: 'rgba(102, 126, 234, 0.2)',
+                                                            border: 'none',
+                                                            borderRadius: '6px',
+                                                            padding: '8px',
+                                                            cursor: 'pointer',
+                                                            color: '#667eea'
+                                                        }}
+                                                    >
+                                                        {copiedToken === `license-${sub.subscription_id}` ? <Check size={14} /> : <Copy size={14} />}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Secret Key (HMAC)</p>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <code style={{
+                                                        fontSize: '12px',
+                                                        background: 'rgba(0,0,0,0.3)',
+                                                        padding: '8px 12px',
+                                                        borderRadius: '6px',
+                                                        flex: 1,
+                                                        wordBreak: 'break-all',
+                                                        color: '#fbbf24'
+                                                    }}>
+                                                        {sub.secret_key || 'ea-sync-secret-key-2026'}
+                                                    </code>
+                                                    <button
+                                                        onClick={() => copyToClipboard(sub.secret_key || 'ea-sync-secret-key-2026', `secret-${sub.subscription_id}`)}
+                                                        style={{
+                                                            background: 'rgba(251, 191, 36, 0.2)',
+                                                            border: 'none',
+                                                            borderRadius: '6px',
+                                                            padding: '8px',
+                                                            cursor: 'pointer',
+                                                            color: '#fbbf24'
+                                                        }}
+                                                    >
+                                                        {copiedToken === `secret-${sub.subscription_id}` ? <Check size={14} /> : <Copy size={14} />}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="master-footer" style={{ border: 'none', paddingTop: '16px', justifyContent: 'center' }}>
                                             {sub.state === 'PAUSED_USER' ? (
                                                 <button
                                                     className="btn-subscribe"
