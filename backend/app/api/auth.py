@@ -10,7 +10,7 @@ from sqlalchemy import text
 
 from app.config import settings
 from app.database import get_db
-from app.schemas import UserRegister, UserLogin, Token, UserResponse
+from app.schemas import UserRegister, UserLogin, Token, UserResponse, LoginResponse
 
 # Security scheme
 security = HTTPBearer()
@@ -140,14 +140,14 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         created_at=user.created_at
     )
 
-@router.post("/auth/login", response_model=Token)
+@router.post("/auth/login", response_model=LoginResponse)
 async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     """
-    Authenticate user and return JWT token.
+    Authenticate user and return JWT token with user data.
     """
     # Fetch user by email
     result = await db.execute(
-        text("SELECT user_id, password_hash, is_active FROM users WHERE email = :email"),
+        text("SELECT user_id, password_hash, is_active, email, full_name, trust_score, created_at FROM users WHERE email = :email"),
         {"email": credentials.email}
     )
     user = result.first()
@@ -172,13 +172,33 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             detail="Account is disabled"
         )
     
+    # Check if user is a master trader
+    master_result = await db.execute(
+        text("SELECT user_id FROM master_profiles WHERE user_id = :user_id"),
+        {"user_id": str(user.user_id)}
+    )
+    is_master = master_result.first() is not None
+    role = "master" if is_master else "user"
+    
     # Create access token
     access_token = create_access_token(
         data={"sub": str(user.user_id)},
         expires_delta=timedelta(minutes=settings.access_token_expire_minutes)
     )
     
-    return Token(access_token=access_token)
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=UserResponse(
+            user_id=str(user.user_id),
+            email=user.email,
+            full_name=user.full_name,
+            trust_score=user.trust_score,
+            is_active=user.is_active,
+            created_at=user.created_at,
+            role=role
+        )
+    )
 
 @router.get("/auth/me", response_model=UserResponse)
 async def get_current_user(
@@ -204,12 +224,21 @@ async def get_current_user(
             detail="User not found"
         )
     
+    # Check if user is a master trader
+    master_result = await db.execute(
+        text("SELECT user_id FROM master_profiles WHERE user_id = :user_id"),
+        {"user_id": user_id}
+    )
+    is_master = master_result.first() is not None
+    role = "master" if is_master else "user"
+    
     return UserResponse(
         user_id=str(user.user_id),
         email=user.email,
         full_name=user.full_name,
         trust_score=user.trust_score,
         is_active=user.is_active,
-        created_at=user.created_at
+        created_at=user.created_at,
+        role=role
     )
 

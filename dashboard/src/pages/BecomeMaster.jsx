@@ -101,7 +101,7 @@ function BecomeMaster({ user, onLogout }) {
                 setIsExistingMaster(true)
 
                 setTimeout(() => {
-                    window.location.href = '/marketplace'
+                    window.location.href = '/master-dashboard'
                 }, 2000)
             }
         } catch (err) {

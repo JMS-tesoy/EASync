@@ -42,9 +42,17 @@ class UserResponse(BaseModel):
     trust_score: int
     is_active: bool
     created_at: datetime
+    role: str = "user"  # "user" or "master"
     
     class Config:
         from_attributes = True
+
+
+class LoginResponse(BaseModel):
+    """Login response with token and user data"""
+    access_token: str
+    token_type: str = "bearer"
+    user: Optional[UserResponse] = None
 
 
 # ============================================================================
