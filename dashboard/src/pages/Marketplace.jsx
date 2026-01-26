@@ -1,6 +1,7 @@
 import Layout from '../components/Layout'
-import { TrendingUp, Users, Star, DollarSign, Activity, Plus } from 'lucide-react'
+import { TrendingUp, Users, Star, DollarSign, Activity, Plus, BarChart2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import './Marketplace.css'
 
 const API_URL = 'http://127.0.0.1:8000/api/v1'
@@ -183,6 +184,13 @@ function Marketplace({ user, onLogout }) {
                                             <Star size={16} fill="currentColor" />
                                         </div>
                                     )}
+                                    <Link
+                                        to={`/master/${master.user_id}/analytics`}
+                                        className="analytics-link"
+                                        title="View Analytics"
+                                    >
+                                        <BarChart2 size={16} />
+                                    </Link>
                                 </div>
 
                                 <p className="master-description">{master.bio}</p>

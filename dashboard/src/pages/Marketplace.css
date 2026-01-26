@@ -66,6 +66,23 @@
     justify-content: center;
 }
 
+.analytics-link {
+    color: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 6px;
+    background: rgba(102, 126, 234, 0.1);
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.analytics-link:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.1);
+}
+
 .master-description {
     font-size: 14px;
     line-height: 1.6;

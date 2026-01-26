@@ -14,6 +14,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import TwoFactorSetup from './pages/TwoFactorSetup'
 import MasterAnalytics from './pages/MasterAnalytics'
+import PublicAnalytics from './pages/PublicAnalytics'
 import './index.css'
 
 function App() {
@@ -144,6 +145,14 @@ function App() {
             isAuthenticated && user?.role === 'master' ?
               <MasterAnalytics user={user} onLogout={handleLogout} /> :
               <Navigate to="/dashboard" />
+          }
+        />
+        <Route
+          path="/master/:masterId/analytics"
+          element={
+            isAuthenticated ?
+              <PublicAnalytics user={user} onLogout={handleLogout} /> :
+              <Navigate to="/login" />
           }
         />
         <Route path="/" element={<Navigate to="/dashboard" />} />
