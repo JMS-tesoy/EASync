@@ -277,49 +277,20 @@ function MasterAnalytics({ user, onLogout }) {
                         </ResponsiveContainer>
                     </div>
 
-                    <div className="chart-card glass" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{ flex: 1 }}>
-                            <h3>Win Rate Trend</h3>
-                            <ResponsiveContainer width="100%" height={120}>
-                                <LineChart data={prepareWinRateData()}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis dataKey="month" stroke="rgba(255,255,255,0.5)" tick={{ fontSize: 12 }} />
-                                    <YAxis stroke="rgba(255,255,255,0.5)" tick={{ fontSize: 12 }} />
-                                    <Tooltip
-                                        contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)' }}
-                                        labelStyle={{ color: '#fff' }}
-                                    />
-                                    <Line type="monotone" dataKey="winRate" stroke={COLORS.warning} strokeWidth={2} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div>
-                                <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Trade Distribution</h3>
-                                <ResponsiveContainer width={200} height={200}>
-                                    <PieChart>
-                                        <Pie
-                                            data={prepareDistributionData()}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            <Cell fill={COLORS.success} />
-                                            <Cell fill={COLORS.danger} />
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)' }}
-                                            labelStyle={{ color: '#fff' }}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
+                    <div className="chart-card glass">
+                        <h3>Win Rate Trend</h3>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <LineChart data={prepareWinRateData()}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                <XAxis dataKey="month" stroke="rgba(255,255,255,0.5)" />
+                                <YAxis stroke="rgba(255,255,255,0.5)" />
+                                <Tooltip
+                                    contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)' }}
+                                    labelStyle={{ color: '#fff' }}
+                                />
+                                <Line type="monotone" dataKey="winRate" stroke={COLORS.warning} strokeWidth={2} />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
 
