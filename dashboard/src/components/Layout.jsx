@@ -24,6 +24,7 @@ function Layout({ children, user, onLogout }) {
     const navItems = [
         ...baseNavItems,
         masterNavItem,
+        ...(isMaster ? [{ path: '/master/analytics', icon: Activity, label: 'Analytics' }] : []),
         { path: '/wallet', icon: CreditCard, label: 'Wallet' },
         { path: '/protection', icon: Activity, label: 'Protection' },
         { path: '/security/2fa', icon: Lock, label: 'Security' },

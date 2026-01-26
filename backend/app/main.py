@@ -14,7 +14,7 @@ import os
 
 from app.config import settings
 from app.database import init_db, close_db
-from app.api import auth, subscriptions, wallets, protection, masters, signals, security
+from app.api import auth, subscriptions, wallets, protection, masters, signals, security, analytics
 
 # Configure logging
 logging.basicConfig(
@@ -99,6 +99,7 @@ app.include_router(wallets.router, prefix="/api/v1", tags=["Wallets"])
 app.include_router(protection.router, prefix="/api/v1", tags=["Protection"])
 app.include_router(masters.router, prefix="/api/v1/masters", tags=["Masters"])
 app.include_router(signals.router, prefix="/api/v1", tags=["Signals"])
+app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 
 
 # Mount static files for EA downloads

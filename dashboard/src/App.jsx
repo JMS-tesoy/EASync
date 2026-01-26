@@ -13,6 +13,7 @@ import VerifyEmail from './pages/VerifyEmail'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import TwoFactorSetup from './pages/TwoFactorSetup'
+import MasterAnalytics from './pages/MasterAnalytics'
 import './index.css'
 
 function App() {
@@ -135,6 +136,14 @@ function App() {
             isAuthenticated ?
               <TwoFactorSetup user={user} onLogout={handleLogout} /> :
               <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/master/analytics"
+          element={
+            isAuthenticated && user?.role === 'master' ?
+              <MasterAnalytics user={user} onLogout={handleLogout} /> :
+              <Navigate to="/dashboard" />
           }
         />
         <Route path="/" element={<Navigate to="/dashboard" />} />
