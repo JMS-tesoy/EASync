@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:production": "vite build --mode production",
+    "preview": "vite preview",
+    "deploy:cloudflare": "pnpm run build:production && pnpm wrangler pages deploy dist",
+    "deploy:preview": "pnpm run build && pnpm wrangler pages deploy dist --branch=preview"
   },
   "dependencies": {
     "react": "^18.3.1",
