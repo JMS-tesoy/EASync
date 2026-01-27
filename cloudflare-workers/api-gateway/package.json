@@ -1,0 +1,21 @@
+{
+	"name": "api-gateway",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.12.4",
+		"vitest": "~3.2.0",
+		"wrangler": "^4.61.0"
+	},
+	"dependencies": {
+		"cookie": "^1.1.1",
+		"itty-router": "^5.0.22",
+		"jsonwebtoken": "^9.0.3"
+	}
+}
